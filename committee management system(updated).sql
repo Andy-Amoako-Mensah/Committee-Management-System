@@ -81,3 +81,63 @@ select * from Committee_members;
 select * from Notifications;
 select * from Meetings;
 select * from Committee;
+
+use CommitteeManagementSystem;
+delete from committee
+limit 3;
+select * from committee;
+alter table committee 
+modify CommitteeChair int ;
+ALTER TABLE Committee  
+ADD CONSTRAINT fk_Committee_Chair  
+FOREIGN KEY (CommitteeChair)  
+REFERENCES Committee_members(userID);
+INSERT INTO Committee (CommitteeID, CommitteeName, CommitteeChair)  
+VALUES  
+(1, 'Finance Committee'),  -- Alice Johnson (userID = 1) is the Chair  
+(2, 'IT Governance Committee'); -- Charlie Brown (userID = 3) is the Chair;  
+delete from Committee_members
+limit 3;
+INSERT INTO Committee (CommitteeID, CommitteeName, CommitteeChair)  
+VALUES  
+(1, 'Finance Committee', NULL),  
+(2, 'HR Committee', NULL),  
+(3, 'Tech Committee', NULL);
+INSERT INTO Committee_members (memberName, email, username, password, affiliation, role, CommitteeID)  
+VALUES  
+('John Doe', 'johndoe@example.com', 'johndoe', SHA2('pass123', 256), 'Finance Dept', 'Member', 1),  
+('Jane Doe', 'janedoe@example.com', 'janedoe', SHA2('pass456', 256), 'HR Dept', 'Chair', 2),  
+('Sam Wilson', 'samwilson@example.com', 'samwilson', SHA2('pass789', 256), 'Tech Dept', 'Member', 3);
+UPDATE Committee SET CommitteeChair = 1 WHERE CommitteeID = 1;  -- Alice Johnson (Finance);
+UPDATE Committee SET CommitteeChair = 2 WHERE CommitteeID = 2;  -- Bob Smith (HR);
+UPDATE Committee SET CommitteeChair = 3 WHERE CommitteeID = 3;  -- Charlie Brown (Tech);
+SELECT userID, memberName, CommitteeID FROM Committee_members WHERE role = 'Chair';
+UPDATE Committee_members  
+SET role = 'Chair' ;
+SET SQL_SAFE_UPDATES = 0;
+SET SQL_SAFE_UPDATES = 1;
+select * from Committee;
+UPDATE Committee c  
+JOIN Committee_members cm ON c.CommitteeID = cm.CommitteeID  
+SET c.CommitteeChair = cm.userID  
+WHERE cm.role = 'Chair';
+desc  Committee_members;
+use  CommitteeManagementSystem;
+alter table committee_members 
+drop column CommitteeID;
+drop table Committee;
+drop table committee;
+SELECT CONSTRAINT_NAME 
+FROM information_schema.KEY_COLUMN_USAGE 
+WHERE TABLE_NAME = 'committee_members' 
+AND COLUMN_NAME = 'CommitteeID';
+ALTER TABLE documents DROP FOREIGN KEY documents_ibfk_1;
+Alter table documents drop column CommitteeID;
+Alter table meetings drop column CommitteeID;
+Alter table Committee_members drop column CommitteeID;
+show tables;
+desc notifications;
+
+
+
+
