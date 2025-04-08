@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CommitteePro - Landing Page</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Open Sans', sans-serif;
+      background: #FFFFFF;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1440px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* Background Image */
+    .background-image {
+      width: 100%;
+      height: 500px;
+      background-image: url("C:/Users/DELL/Documents/GitHub/Committee-Management-System/bgImage.jpg");
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    /* Navigation Container */
+    .container {
+      width: 100%;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 2;
+      background: transparent;
+      box-sizing: border-box;
+    }
+
+    /* Logo */
+    .logo {
+      font-family: 'Inter', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+
+    /* Navigation Menu */
+    .header-menu {
+      display: flex;
+      gap: 24px;
+    }
+
+    .header-menu-item {
+      padding: 15px 12px;
+      font-size: 14px;
+      line-height: 22px;
+      color: #000000;
+      font-weight: 400;
+      border-radius: 6px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .header-menu-item.selected {
+      color: #EEB866;
+      font-weight: 700;
+    }
+
+    .header-menu-item.selected .indicator {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: #EEB866;
+      border-radius: 2px;
+    }
+
+    /* Button Group */
+    .button-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    .button {
+      height: 36px;
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      line-height: 22px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'Open Sans', sans-serif;
+      border: none;
+    }
+
+    .button.outlined {
+      color: #EEB866;
+      background: transparent;
+      border: 1px solid #EEB866;
+    }
+
+    .button.outlined:hover {
+      background: #DEE1E6;
+    }
+
+    .button.filled {
+      color: #FFFFFF;
+      background: #EEB866;
+    }
+
+    .button.filled:hover {
+      background: #E79924;
+    }
+
+    /* Group 1 - Feature Cards Section */
+    .group {
+      position: absolute;
+      top: 500px; /* Make sure the cards are just below the background image */
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      padding: 40px 0;
+      box-sizing: border-box;
+      z-index: 1;
+    }
+
+    /* Individual Card Styling */
+    .card {
+      width: 300px;
+      background: rgba(255, 255, 255, 0.8); /* Slight transparency */
+      padding: 20px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    /* Card Icons Styling */
+    .icon {
+      width: 32px;
+      height: 32px;
+      fill: #EEB866;
+      margin-bottom: 20px;
+    }
+
+    /* Header Text Styling */
+    .card .text {
+      font-family: 'Inter', sans-serif;
+      font-size: 20px;
+      line-height: 30px;
+      font-weight: 700;
+      color: #000000;
+      margin-bottom: 10px;
+    }
+
+    /* Description Text Styling */
+    .card .description-text {
+      font-family: 'Open Sans', sans-serif;
+      font-size: 14px;
+      line-height: 22px;
+      font-weight: 400;
+      color: #565E6C;
+      margin-bottom: 20px;
+    }
+
+    /* Action Button */
+    .card .action-button {
+      width: 100px;
+      height: 32px;
+      border-radius: 8px;
+      border: none;
+      background: #EEB866;
+      color: #FFFFFF;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .card .action-button:hover {
+      background: #E79924;
+    }
+
+    .card .action-button:active {
+      background: #BCC1CA;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- Background Image Section -->
+    <div class="background-image">
+      <!-- Navigation -->
+      <div class="container">
+        <div class="logo">CommitteePro</div>
+        <div class="header-menu">
+          <div class="header-menu-item selected">Home <div class="indicator"></div></div>
+          <div class="header-menu-item">About</div>
+          <div class="header-menu-item">Contact</div>
+        </div>
+        <div class="button-group">
+          <button class="button outlined">Log In</button>
+          <button class="button filled">Get Started</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="group">
+      <!-- Card 1: Plan Meetings -->
+      <div class="card">
+        <svg class="icon">
+          <!-- Example calendar icon -->
+          <use xlink:href="#calendar-icon"></use>
+        </svg>
+        <div class="text">Plan Meetings</div>
+        <div class="description-text">Easily schedule and manage committee meetings with our intuitive calendar system.</div>
+        <button class="action-button">Learn More</button>
+      </div>
+
+      <!-- Card 2: Add Members -->
+      <div class="card">
+        <svg class="icon">
+          <!-- Example add icon -->
+          <use xlink:href="#add-icon"></use>
+        </svg>
+        <div class="text">Add Members</div>
+        <div class="description-text">Quickly invite and organize your committee members with roles and permissions.</div>
+        <button class="action-button">Add Now</button>
+      </div>
+
+      <!-- Card 3: Upload Files -->
+      <div class="card">
+        <svg class="icon">
+          <!-- Example upload icon -->
+          <use xlink:href="#upload-icon"></use>
+        </svg>
+        <div class="text">Upload Files</div>
+        <div class="description-text">Securely upload and share documents, agendas, and minutes with your team.</div>
+        <button class="action-button">Upload</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Placeholder SVG Icons -->
+  <svg style="display: none;">
+    <symbol id="calendar-icon" viewBox="0 0 24 24" fill="currentColor">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="none" />
+      <line x1="16" y1="2" x2="16" y2="6" stroke="#000" stroke-width="2"/>
+      <line x1="8" y1="2" x2="8" y2="6" stroke="#000" stroke-width="2"/>
+    </symbol>
+    <symbol id="add-icon" viewBox="0 0 24 24" fill="currentColor">
+      <circle cx="12" cy="12" r="10" stroke="none"/>
+      <line x1="12" y1="8" x2="12" y2="16" stroke="#000" stroke-width="2"/>
+      <line x1="8" y1="12" x2="16" y2="12" stroke="#000" stroke-width="2"/>
+    </symbol>
+    <symbol id="upload-icon" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 16v-8M12 8l-4 4m4-4l4 4M4 20h16" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </svg>
+
+</body>
+</html>
