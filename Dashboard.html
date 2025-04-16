@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Dashboard</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap 3.4 -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <style>
+    .row.content { height: 600px; }
+    .sidenav { background-color: #e0e0e0; height: 100%; }
+    .navbar-inverse .navbar-collapse, 
+    .navbar-inverse .navbar-header, 
+    .navbar-inverse .navbar-nav {
+      width: 80%; margin: 0 auto;
+    }
+    .navbar-inverse .navbar-nav li a:hover {
+      background-color: #ddd; color: #333;
+    }
+    @media screen and (max-width: 700px) {
+      .row.content { height: auto; }
+    }
+    .committees-section { display: block; }
+    .avatar-group img {
+      width: 30px; height: 30px; border-radius: 50%; margin-right: 5px;
+    }
+    .dropdown-toggle::after { display: none; }
+    .dropdown-menu a { cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-inverse visible-xs">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>                         
+      </button>
+      <a class="navbar-brand" href="#">Logo</a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Dashboard</a></li>
+        <li><a href="#">Age</a></li>
+        <li><a href="#">Gender</a></li>
+        <li><a href="#">Geo</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Main layout -->
+<div class="container-fluid">
+  <div class="row content">
+
+    <!-- Sidebar -->
+    <div class="col-sm-3 sidenav hidden-xs">
+      <h2>Logo</h2>
+      <ul class="nav nav-pills nav-stacked">
+        <li class="active"><a href="#">Committees</a></li>
+        <li><a href="meetings.html">Meetings</a></li>
+        <li><a href="notifications.html">Notifications</a></li>
+        <li><a href="#">Resources</a></li>
+        <li><a href="#">Settings</a></li>
+        <li><a href="javascript:void(0);" onclick="confirmLogout()">Logout</a></li>
+      </ul><br>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-sm-9">
+      <div id="committees" class="committees-section">
+        <h3>Committee Members</h3>
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th>userID</th>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Email</th>
+                <th>Date Joined</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="members-table-body">
+              <tr><td colspan="6" class="text-center">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- JavaScript Section -->
+<script>
+  // Logout confirmation
+  function confirmLogout() {
+    if (confirm("Are you sure you want to log out?")) {
+      window.location.href = "logout.php";
+    }
+  }
+
+  // Fetch committee members from fetch.php
+  fetch('fetch.php')
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.getElementById('members-table-body');
+      tbody.innerHTML = '';
+
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center">No members found</td></tr>';
+      } else {
+        data.forEach(row => {
+          tbody.innerHTML += `
+            <tr>
+              <td>${row.userID}</td>
+              <td>${row.Name}</td>
+              <td>${row.role}</td>
+              <td>${row.email}</td>
+              <td>${row.datejoined}</td>
+              <td>
+                <div class="dropdown">
+                  <button class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a><i class="fas fa-edit"></i> Edit</a></li>
+                    <li><a><i class="fas fa-trash"></i> Delete</a></li>
+                  </ul>
+                </div>
+              </td>
+            </tr>`;
+        });
+      }
+    })
+    .catch(error => {
+      document.getElementById('members-table-body').innerHTML =
+        '<tr><td colspan="6" class="text-danger text-center">Failed to load data</td></tr>';
+      console.error('Error:', error);
+    });
+</script>
+
+</body>
+</html>

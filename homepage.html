@@ -23,7 +23,7 @@
     .background-image {
       width: 100%;
       height: 500px;
-      background-image: url("C:/Users/DELL/Documents/GitHub/Committee-Management-System/bgImage.jpg");
+      background-image: url("/Committee-Management-System/bgImage.jpg");
       background-size: cover;
       background-position: center;
       position: relative;
@@ -50,7 +50,7 @@
       font-family: 'Inter', sans-serif;
       font-size: 28px;
       font-weight: 700;
-      color: #FFFFFF;
+      color: #EEB866;
     }
 
     /* Navigation Menu */
@@ -127,7 +127,7 @@
     /* Group 1 - Feature Cards Section */
     .group {
       position: absolute;
-      top: 500px; /* Make sure the cards are just below the background image */
+      top: 550px; /* Make sure the cards are just below the background image */
       left: 0;
       width: 100%;
       display: flex;
@@ -217,13 +217,20 @@
           <div class="header-menu-item">Contact</div>
         </div>
         <div class="button-group">
-          <button class="button outlined">Log In</button>
-          <button class="button filled">Get Started</button>
+          <a href="login.html" style="text-decoration: none;">
+            <button class="button outlined">Login</button>
+          </a>
+          
+          <a href="signup.html" style="text-decoration: none;">
+            <button class="button filled">Get Started</button>
+          </a>
+          
         </div>
       </div>
     </div>
 
     <!-- Features Section -->
+     <h1 style="text-align: center;"><b>FEATURES</b></h1>
     <div class="group">
       <!-- Card 1: Plan Meetings -->
       <div class="card">
