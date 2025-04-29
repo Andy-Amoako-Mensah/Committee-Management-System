@@ -55,7 +55,7 @@ if (!empty($subject) && !empty($message)) {
                     $mail->Host = 'smtp.gmail.com';
                     $mail->SMTPAuth = true;
                     $mail->Username = 'andyamoako07@gmail.com'; // Your Gmail
-                    $mail->Password = 'YOUR_APP_PASSWORD'; // Use Gmail App Password
+                    $mail->Password = 'mmhg lczu fsav mflt'; // Use Gmail App Password
                     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                     $mail->Port = 587;
 

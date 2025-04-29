@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Account Settings - Dashboard</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap 3.4 -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <style>
+    .row.content { height: 600px; }
+    .sidenav { background-color: #e0e0e0; height: 100%; padding-top: 20px; }
+    .navbar-inverse .navbar-collapse, 
+    .navbar-inverse .navbar-header, 
+    .navbar-inverse .navbar-nav {
+      width: 80%; margin: 0 auto;
+    }
+    .navbar-inverse .navbar-nav li a:hover {
+      background-color: #ddd; color: #333;
+    }
+    @media screen and (max-width: 700px) {
+      .row.content { height: auto; }
+    }
+    .avatar img {
+      width: 100px; height: 100px; border-radius: 50%; margin-bottom: 20px;
+    }
+    .settings-form input, .settings-form button {
+      margin-bottom: 15px;
+    }
+    .settings-form label {
+      font-weight: bold;
+    }
+    .submit-btn {
+      background-color: #5cb85c;
+      color: white;
+    }
+    .submit-btn:hover {
+      background-color: #4cae4c;
+    }
+    .profile-section {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .profile-section .upload-btn {
+      background-color: #007bff;
+      color: white;
+    }
+    .profile-section .upload-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-inverse visible-xs">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>                         
+      </button>
+      <a class="navbar-brand" href="#">Logo</a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Dashboard</a></li>
+        <li><a href="#">Age</a></li>
+        <li><a href="#">Gender</a></li>
+        <li><a href="#">Geo</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Main layout -->
+<div class="container-fluid">
+  <div class="row content">
+
+    <!-- Sidebar -->
+    <div class="col-sm-3 sidenav hidden-xs">
+      <h2>Logo</h2>
+      <ul class="nav nav-pills nav-stacked">
+        <li><a href="#">Committees</a></li>
+        <li><a href="meetings.html">Meetings</a></li>
+        <li><a href="notifications.html">Notifications</a></li>
+        <li><a href="#">Resources</a></li>
+        <li class="active"><a href="account_settings.html">Settings</a></li>
+        <li><a href="javascript:void(0);" onclick="confirmLogout()">Logout</a></li>
+      </ul><br>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-sm-9">
+      <h3>Account Settings</h3>
+
+      <!-- Profile Section -->
+      <div class="profile-section">
+        <h4>Profile Picture</h4>
+        <div class="avatar">
+          <img src="path_to_existing_image.jpg" alt="User Avatar">
+        </div>
+        <form method="POST" enctype="multipart/form-data" action="update_account.php">
+          <button type="submit" class="btn upload-btn">Upload New Photo</button>
+          <input type="file" name="profile_image" style="display: none;">
+        </form>
+      </div>
+
+      <!-- Settings Form -->
+      <form method="POST" action="update_account.php" class="settings-form">
+
+        <!-- Change Password Section -->
+        <div class="form-group">
+          <label for="current-password">Current Password</label>
+          <input type="password" class="form-control" id="current-password" name="current_password" required>
+        </div>
+        <div class="form-group">
+          <label for="new-password">New Password</label>
+          <input type="password" class="form-control" id="new-password" name="new_password">
+        </div>
+        <div class="form-group">
+          <label for="confirm-password">Confirm New Password</label>
+          <input type="password" class="form-control" id="confirm-password" name="confirm_password">
+        </div>
+
+        <!-- Change Email Section -->
+        <div class="form-group">
+          <label for="current-email">Current Email</label>
+          <input type="email" class="form-control" id="current-email" name="current_email" readonly>
+        </div>
+        <div class="form-group">
+          <label for="new-email">New Email</label>
+          <input type="email" class="form-control" id="new-email" name="new_email">
+        </div>
+        <div class="form-group">
+          <label for="confirm-email">Confirm New Email</label>
+          <input type="email" class="form-control" id="confirm-email" name="confirm_email">
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn submit-btn">Save Changes</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<!-- JavaScript Section -->
+<script>
+  $(document).ready(function () {
+    // Fetch email using AJAX on page load
+    $.ajax({
+      url: 'update_account.php',
+      method: 'GET',
+      dataType: 'json',
+      success: function (response) {
+        if (response.email) {
+          $('#current-email').val(response.email);
+        } else {
+          $('#current-email').val("Email not found");
+        }
+      },
+      error: function () {
+        $('#current-email').val("Error loading email");
+      }
+    });
+  });
+
+  function confirmLogout() {
+    if (confirm("Are you sure you want to log out?")) {
+      window.location.href = "logout.php";
+    }
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Resources</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    .row.content {
+      min-height: 100vh;
+    }
+
+    .sidenav {
+      background-color: #e0e0e0;
+      height: 100vh;
+      padding-top: 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 25%;
+      overflow-y: auto;
+    }
+
+    .main-content {
+      margin-left: 25%;
+      padding: 30px;
+    }
+
+    .upload-box {
+      margin-top: 30px;
+      padding: 30px;
+      background: #f7f7f7;
+      border: 2px dashed #ccc;
+      text-align: center;
+      border-radius: 6px;
+    }
+
+    .upload-box input[type="file"] {
+      display: none;
+    }
+
+    .upload-box label {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #005af0;
+      color: white;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .upload-box label:hover {
+      background-color: #003fa3;
+    }
+
+    .filter-box {
+      margin: 20px 0;
+    }
+
+    tr.clickable-row:hover {
+      cursor: pointer;
+      background-color: #f0f8ff;
+    }
+
+    @media (max-width: 767px) {
+      .sidenav {
+        position: relative;
+        height: auto;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Modal for Description -->
+<div class="modal fade" id="descriptionModal" tabindex="-1" role="dialog" aria-labelledby="descriptionModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-info">
+        <h4 class="modal-title" id="descriptionModalLabel">File Description</h4>
+      </div>
+      <div class="modal-body" id="descriptionText" style="font-size: 16px; color: #333;"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Navbar for small devices -->
+<nav class="navbar navbar-inverse visible-xs">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Logo</a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li><a href="#">Dashboard</a></li>
+        <li><a href="meetings.html">Meetings</a></li>
+        <li><a href="notifications.html">Notifications</a></li>
+        <li class="active"><a href="#">Resources</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="javascript:void(0);" onclick="confirmLogout()">Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Side menu -->
+<div class="col-sm-3 sidenav hidden-xs">
+  <h2>Logo</h2>
+  <ul class="nav nav-pills nav-stacked">
+    <li><a href="#">Dashboard</a></li>
+    <li><a href="meetings.html">Meetings</a></li>
+    <li><a href="notifications.html">Notifications</a></li>
+    <li class="active"><a href="#">Resources</a></li>
+    <li><a href="settings.html">Settings</a></li>
+    <li><a href="javascript:void(0);" onclick="confirmLogout()">Logout</a></li>
+  </ul><br>
+</div>
+
+<!-- Main content -->
+<div class="main-content col-sm-9">
+  <h3>Uploaded Resources</h3>
+
+  <!-- Upload Box -->
+  <div class="upload-box">
+    <form id="uploadForm" enctype="multipart/form-data">
+      <p>Supported: PDF, DOC, DOCX</p>
+      <label for="fileInput">Choose File</label>
+      <input type="file" id="fileInput" name="file" accept=".pdf,.doc,.docx" required>
+    </form>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-box">
+    <label for="filterDate">Filter by Date:</label>
+    <input type="date" id="filterDate" class="form-control" style="max-width: 250px;">
+  </div>
+
+  <!-- Table -->
+  <div class="table-responsive">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Document ID</th>
+          <th>File Name</th>
+          <th>Uploaded At</th>
+          <th>Download</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody id="docs-table-body">
+        <tr><td colspan="6" class="text-center">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  let allDocuments = [];
+
+  function confirmLogout() {
+    if (confirm("Are you sure you want to log out?")) {
+      window.location.href = "logout.php";
+    }
+  }
+
+  // Handle file upload
+  document.getElementById('fileInput').addEventListener('change', function () {
+    const fileInput = this;
+    if (fileInput.files.length === 0) return;
+
+    const description = prompt("Enter a brief description for this file:");
+    if (!description) return;
+
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    formData.append('description', description);
+
+    fetch('upload_document.php', {
+      method: 'POST',
+      body: formData
+    })
+    .then(res => res.text())
+    .then(response => {
+      alert(response);
+      fileInput.value = '';
+      loadDocuments();
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Upload failed.");
+    });
+  });
+
+  // Load docs from DB
+  function loadDocuments() {
+    fetch('fetch_documents.php')
+      .then(res => res.json())
+      .then(data => {
+        allDocuments = data;
+        renderDocuments(data);
+      })
+      .catch(error => {
+        console.error('Error loading documents:', error);
+        document.getElementById('docs-table-body').innerHTML =
+          '<tr><td colspan="6" class="text-danger text-center">Failed to load files</td></tr>';
+      });
+  }
+
+  // Render to table
+  function renderDocuments(docs) {
+    const tbody = document.getElementById('docs-table-body');
+    tbody.innerHTML = '';
+
+    if (docs.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center">No files uploaded yet</td></tr>';
+    } else {
+      docs.forEach((doc, index) => {
+        const description = doc.description ? doc.description : "No description available";
+
+        tbody.innerHTML += `
+          <tr class="clickable-row" onclick="showDescription('${description.replace(/'/g, "\\'")}')">
+            <td>${index + 1}</td>
+            <td>${doc.documentID}</td>
+            <td>${doc.name}</td>
+            <td>${doc.uploadTime}</td>
+            <td><a class="btn btn-sm btn-success" href="download.php?file=${encodeURIComponent(doc.filePath)}"><i class="fas fa-download"></i> Download</a></td>
+            <td><button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteDocument(${doc.documentID})"><i class="fas fa-trash-alt"></i> Delete</button></td>
+          </tr>`;
+      });
+    }
+  }
+
+  function showDescription(desc) {
+    document.getElementById('descriptionText').textContent = desc;
+    $('#descriptionModal').modal('show');
+  }
+
+  // Delete
+  function deleteDocument(documentID) {
+    if (!confirm("Delete this file?")) return;
+
+    const url = `delete_document.php?id=${documentID}`;
+
+    fetch(url, { method: 'GET' })
+      .then(res => res.text())
+      .then(response => {
+        alert(response);
+        loadDocuments();
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Failed to delete file.");
+      });
+  }
+
+  // Date Filter
+  document.getElementById('filterDate').addEventListener('input', function () {
+    const selectedDate = this.value;
+    if (!selectedDate) {
+      renderDocuments(allDocuments);
+      return;
+    }
+
+    const filtered = allDocuments.filter(doc =>
+      doc.uploadTime.startsWith(selectedDate)
+    );
+    renderDocuments(filtered);
+  });
+
+  // On load
+  loadDocuments();
+</script>
+
+</body>
+</html>

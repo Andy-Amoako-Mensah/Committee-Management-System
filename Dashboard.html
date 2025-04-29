@@ -11,25 +11,30 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   <style>
-    .row.content { height: 600px; }
-    .sidenav { background-color: #e0e0e0; height: 100%; }
-    .navbar-inverse .navbar-collapse, 
-    .navbar-inverse .navbar-header, 
+    .row.content { min-height: 600px; }
+    .sidenav { background-color: #e0e0e0; height: 100vh; padding-top: 20px; }
+    .navbar-inverse .navbar-collapse,
+    .navbar-inverse .navbar-header,
     .navbar-inverse .navbar-nav {
       width: 80%; margin: 0 auto;
     }
     .navbar-inverse .navbar-nav li a:hover {
       background-color: #ddd; color: #333;
     }
-    @media screen and (max-width: 700px) {
-      .row.content { height: auto; }
+    .table th, .table td { vertical-align: middle !important; }
+    .search-bar, .filter-bar { margin-bottom: 15px; }
+    .btn-group-top { margin-bottom: 20px; }
+    .table thead { background-color: #f5f5f5; }
+    .checkbox-col { text-align: center; }
+    th.sortable { cursor: pointer; }
+    th.sortable:hover { background-color: #f0f0f0; }
+    .sort-indicator { font-size: 12px; margin-left: 5px; }
+    .edit-btn {
+      background-color: #5bc0de; color: white; border: none;
+      padding: 5px 10px; cursor: pointer; border-radius: 3px;
     }
-    .committees-section { display: block; }
-    .avatar-group img {
-      width: 30px; height: 30px; border-radius: 50%; margin-right: 5px;
-    }
-    .dropdown-toggle::after { display: none; }
-    .dropdown-menu a { cursor: pointer; }
+    .edit-btn:hover { background-color: #31b0d5; }
+    .edit-btn:focus { outline: none; }
   </style>
 </head>
 <body>
@@ -62,79 +67,218 @@
     <div class="col-sm-3 sidenav hidden-xs">
       <h2>Logo</h2>
       <ul class="nav nav-pills nav-stacked">
-        <li class="active"><a href="#">Committees</a></li>
+        <li class="active"><a href="#">Members</a></li>
         <li><a href="meetings.html">Meetings</a></li>
         <li><a href="notifications.html">Notifications</a></li>
-        <li><a href="#">Resources</a></li>
-        <li><a href="#">Settings</a></li>
+        <li><a href="resources.html">Resources</a></li>
+        <li><a href="settings.html">Settings</a></li>
         <li><a href="javascript:void(0);" onclick="confirmLogout()">Logout</a></li>
       </ul><br>
     </div>
 
     <!-- Main Content -->
     <div class="col-sm-9">
-      <div id="committees" class="committees-section">
-        <h3>Committee Members</h3>
-        <div class="table-responsive">
-          <table class="table table-bordered table-hover">
-            <thead>
-              <tr>
-                <th>userID</th>
-                <th>Name</th>
-                <th>Role</th>
-                <th>Email</th>
-                <th>Date Joined</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="members-table-body">
-              <tr><td colspan="6" class="text-center">Loading...</td></tr>
-            </tbody>
-          </table>
+      <h3>Committee Members</h3>
+
+      <div class="btn-group-top">
+        <button class="btn btn-success" data-toggle="modal" data-target="#addUserModal">
+          <i class="fa fa-user-plus"></i> Add User
+        </button>
+        <button class="btn btn-danger" onclick="deleteSelected()">
+          <i class="fa fa-trash"></i> Delete Selected
+        </button>
+      </div>
+
+      <div class="row filter-bar">
+        <div class="col-sm-4">
+          <input type="text" id="searchInput" class="form-control" placeholder="Search by name, email, role..." onkeyup="filterTable()">
+        </div>
+        <div class="col-sm-4">
+          <input type="date" id="filterDate" class="form-control" onchange="filterTable()">
         </div>
       </div>
-    </div>
 
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover" id="membersTable">
+          <thead>
+            <tr>
+              <th class="checkbox-col"><input type="checkbox" onclick="toggleAll(this)"></th>
+              <th class="sortable" onclick="sortTable(1)">userID <span class="sort-indicator"></span></th>
+              <th class="sortable" onclick="sortTable(2)">Name <span class="sort-indicator"></span></th>
+              <th class="sortable" onclick="sortTable(3)">Role <span class="sort-indicator"></span></th>
+              <th class="sortable" onclick="sortTable(4)">Email <span class="sort-indicator"></span></th>
+              <th class="sortable" onclick="sortTable(5)">Date Joined <span class="sort-indicator"></span></th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="members-table-body">
+            <tr><td colspan="7" class="text-center">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- JavaScript Section -->
+<!-- Edit User Modal -->
+<div id="editUserModal" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="editUserForm" method="POST" action="save_change.php">
+        <div class="modal-header">
+          <h4 class="modal-title">Edit User</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="userID" id="editUserID">
+          <label>First Name</label>
+          <input type="text" class="form-control" name="Fname" id="editFname" required>
+          <label>Last Name</label>
+          <input type="text" class="form-control" name="Lname" id="editLname" required>
+          <label>Email</label>
+          <input type="email" class="form-control" name="email" id="editEmail" required>
+          <label>Role</label>
+          <select class="form-control" name="role" id="editRole" required>
+            <option value="Admin">Admin</option>
+            <option value="User">User</option>
+          </select>
+          <label>New Password <small>(leave blank to keep current)</small></label>
+          <input type="password" class="form-control" name="password" id="editPassword">
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script>
-  // Logout confirmation
   function confirmLogout() {
     if (confirm("Are you sure you want to log out?")) {
       window.location.href = "logout.php";
     }
   }
 
-  // Fetch committee members from fetch.php
+  function toggleAll(source) {
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    checkboxes.forEach(cb => cb.checked = source.checked);
+  }
+
+  function filterTable() {
+    const input = document.getElementById("searchInput").value.toLowerCase();
+    const date = document.getElementById("filterDate").value;
+    const rows = document.querySelectorAll("#members-table-body tr");
+
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      const dateCell = row.querySelector("td:nth-child(6)")?.textContent || "";
+      const matchesSearch = text.includes(input);
+      const matchesDate = !date || dateCell.includes(date);
+      row.style.display = (matchesSearch && matchesDate) ? "" : "none";
+    });
+  }
+
+  let currentSortColumn = -1;
+  let currentSortDirection = 'asc';
+
+  function sortTable(columnIndex) {
+    const tbody = document.getElementById("members-table-body");
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+
+    if (currentSortColumn === columnIndex) {
+      currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      currentSortColumn = columnIndex;
+      currentSortDirection = 'asc';
+    }
+
+    rows.sort((a, b) => {
+      const valA = a.cells[columnIndex]?.textContent.trim().toLowerCase() || "";
+      const valB = b.cells[columnIndex]?.textContent.trim().toLowerCase() || "";
+      return currentSortDirection === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    });
+
+    rows.forEach(row => tbody.appendChild(row));
+    document.querySelectorAll(".sort-indicator").forEach(ind => ind.textContent = '');
+    const currentIndicator = document.querySelectorAll(".sortable")[columnIndex - 1].querySelector(".sort-indicator");
+    currentIndicator.textContent = currentSortDirection === 'asc' ? '▲' : '▼';
+  }
+
+  function openEditModal(userID, fullName, role, email, datejoined) {
+    const nameParts = fullName.trim().split(' ');
+    const Fname = nameParts[0] || '';
+    const Lname = nameParts.slice(1).join(' ') || '';
+
+    document.getElementById('editUserID').value = userID;
+    document.getElementById('editFname').value = Fname;
+    document.getElementById('editLname').value = Lname;
+    document.getElementById('editRole').value = role;
+    document.getElementById('editEmail').value = email;
+    document.getElementById('editPassword').value = '';
+    $('#editUserModal').modal('show');
+  }
+
+  document.getElementById('editUserForm').addEventListener('submit', function(e) {
+    const confirmed = confirm("Are you sure you want to save changes to this user?");
+    if (!confirmed) e.preventDefault();
+  });
+
+  function deleteSelected() {
+    const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+    if (checkboxes.length === 0) {
+      alert("Please select at least one user to delete.");
+      return;
+    }
+
+    const confirmDelete = confirm(`Are you sure you want to delete ${checkboxes.length} selected user(s)?`);
+    if (!confirmDelete) return;
+
+    const idsToDelete = Array.from(checkboxes).map(cb => cb.getAttribute("data-userid"));
+
+    fetch('delete_members.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userIDs: idsToDelete })
+    })
+    .then(res => res.json())
+    .then(response => {
+      if (response.success) {
+        alert("User(s) deleted successfully.");
+        location.reload();
+      } else {
+        alert("Failed to delete user(s).");
+      }
+    })
+    .catch(err => {
+      console.error("Error:", err);
+      alert("An error occurred while deleting.");
+    });
+  }
+
+  // Fetch data
   fetch('fetch.php')
     .then(res => res.json())
     .then(data => {
       const tbody = document.getElementById('members-table-body');
       tbody.innerHTML = '';
-
       if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center">No members found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center">No members found</td></tr>';
       } else {
         data.forEach(row => {
           tbody.innerHTML += `
             <tr>
+              <td class="checkbox-col"><input type="checkbox" class="row-checkbox" data-userid="${row.userID}"></td>
               <td>${row.userID}</td>
               <td>${row.Name}</td>
               <td>${row.role}</td>
               <td>${row.email}</td>
               <td>${row.datejoined}</td>
               <td>
-                <div class="dropdown">
-                  <button class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
-                    <i class="fas fa-ellipsis-v"></i>
-                  </button>
-                  <ul class="dropdown-menu">
-                    <li><a><i class="fas fa-edit"></i> Edit</a></li>
-                    <li><a><i class="fas fa-trash"></i> Delete</a></li>
-                  </ul>
-                </div>
+                <button class="edit-btn" onclick="openEditModal(
+                  '${row.userID}', '${row.Name}', '${row.role}', '${row.email}', '${row.datejoined}'
+                )"><i class="fa fa-edit"></i> Edit</button>
               </td>
             </tr>`;
         });
@@ -142,7 +286,7 @@
     })
     .catch(error => {
       document.getElementById('members-table-body').innerHTML =
-        '<tr><td colspan="6" class="text-danger text-center">Failed to load data</td></tr>';
+        '<tr><td colspan="7" class="text-danger text-center">Failed to load data</td></tr>';
       console.error('Error:', error);
     });
 </script>

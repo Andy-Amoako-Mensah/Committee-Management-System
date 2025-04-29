@@ -13,8 +13,8 @@
   <style>
     .row.content { height: 600px; }
     .sidenav { background-color: #e0e0e0; height: 100%; }
-    .navbar-inverse .navbar-collapse, 
-    .navbar-inverse .navbar-header, 
+    .navbar-inverse .navbar-collapse,
+    .navbar-inverse .navbar-header,
     .navbar-inverse .navbar-nav {
       width: 80%; margin: 0 auto;
     }
@@ -24,16 +24,20 @@
     @media screen and (max-width: 700px) {
       .row.content { height: auto; }
     }
-    .committees-section { display: block; }
-    .avatar-group img {
-      width: 30px; height: 30px; border-radius: 50%; margin-right: 5px;
-    }
-    .dropdown-toggle::after { display: none; }
-    .dropdown-menu a { cursor: pointer; }
-
-    /* Past meetings row shade */
     .past-meeting {
       background-color: #f2dede;
+    }
+    .search-input {
+      margin-bottom: 10px;
+      max-width: 300px;
+    }
+    th.sortable:hover {
+      cursor: pointer;
+      background-color: #f9f9f9;
+    }
+    .table-wrapper {
+      max-height: 400px;
+      overflow-y: auto;
     }
   </style>
 </head>
@@ -91,16 +95,19 @@
           </button>
         </div>
 
-        <!-- Table displaying meetings -->
-        <div class="table-responsive">
-          <table class="table table-bordered table-hover">
+        <!-- Search Filter -->
+        <input type="text" id="searchInput" class="form-control search-input" placeholder="Search by location, date, or agenda">
+
+        <!-- Meetings Table -->
+        <div class="table-responsive table-wrapper">
+          <table class="table table-bordered table-hover" id="meetingsTable">
             <thead>
               <tr>
                 <th>Meeting ID</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Location</th>
-                <th>Agenda</th>
+                <th class="sortable" onclick="sortTable(1)">Date <i class="fa fa-sort"></i></th>
+                <th class="sortable" onclick="sortTable(2)">Time <i class="fa fa-sort"></i></th>
+                <th class="sortable" onclick="sortTable(3)">Location <i class="fa fa-sort"></i></th>
+                <th class="sortable" onclick="sortTable(4)">Agenda <i class="fa fa-sort"></i></th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -116,35 +123,30 @@
 </div>
 
 <!-- Add Meeting Modal -->
-<div class="modal fade" id="addMeetingModal" tabindex="-1" role="dialog" aria-labelledby="addMeetingModalLabel">
+<div class="modal fade" id="addMeetingModal" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <form action="save_meeting.php" method="POST" class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title" id="addMeetingModalLabel">Add New Meeting</h4>
+        <h4 class="modal-title">Add New Meeting</h4>
         <button type="button" class="close" data-dismiss="modal">&times;</button>
       </div>
       <div class="modal-body">
-
         <div class="form-group">
           <label for="meetingDate">Date</label>
-          <input id="meetingDate" name="date" class="form-control form-control-lg" type="date" required />
+          <input id="meetingDate" name="date" class="form-control" type="date" required />
         </div>
-
         <div class="form-group">
           <label for="meetingTime">Time</label>
           <input id="meetingTime" name="time" class="form-control" type="time" required />
         </div>
-
         <div class="form-group">
           <label for="meetingLocation">Location</label>
-          <input id="meetingLocation" name="location" class="form-control form-control-sm" type="text" placeholder="Enter location" required />
+          <input id="meetingLocation" name="location" class="form-control" type="text" required />
         </div>
-
         <div class="form-group">
           <label for="meetingAgenda">Agenda</label>
-          <input id="meetingAgenda" name="agenda" class="form-control rounded-pill" type="text" placeholder="Meeting agenda" required />
+          <input id="meetingAgenda" name="agenda" class="form-control" type="text" required />
         </div>
-
       </div>
       <div class="modal-footer">
         <button type="submit" class="btn btn-success">Save Meeting</button>
@@ -154,52 +156,83 @@
   </div>
 </div>
 
+<!-- Edit Meeting Modal -->
+<div class="modal fade" id="editMeetingModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <form id="editMeetingForm" method="POST" action="update_meeting.php" class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Edit Meeting</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editMeetingID" name="meetingID" />
+        <div class="form-group">
+          <label for="editMeetingDate">Date</label>
+          <input id="editMeetingDate" name="date" class="form-control" type="date" required />
+        </div>
+        <div class="form-group">
+          <label for="editMeetingTime">Time</label>
+          <input id="editMeetingTime" name="time" class="form-control" type="time" required />
+        </div>
+        <div class="form-group">
+          <label for="editMeetingLocation">Location</label>
+          <input id="editMeetingLocation" name="location" class="form-control" type="text" required />
+        </div>
+        <div class="form-group">
+          <label for="editMeetingAgenda">Agenda</label>
+          <input id="editMeetingAgenda" name="agenda" class="form-control" type="text" required />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Save Changes</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- JavaScript Section -->
 <!-- JavaScript Section -->
 <script>
-  // Logout confirmation
   function confirmLogout() {
     if (confirm("Are you sure you want to log out?")) {
       window.location.href = "logout.php";
     }
   }
 
-  // Fetch meetings from fetch_meetings.php
+  // Load meetings
   fetch('fetch_meetings.php')
     .then(res => res.json())
     .then(data => {
       const tbody = document.getElementById('meetings-table-body');
       tbody.innerHTML = '';
+      const currentDate = new Date();
 
       if (!Array.isArray(data) || data.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" class="text-center">No meetings found</td></tr>';
         return;
       }
 
-      const currentDate = new Date();
-
       data.forEach(row => {
         const meetingDate = new Date(row.date);
-        const isPastMeeting = meetingDate < currentDate;
-
-        tbody.innerHTML += `
-          <tr class="${isPastMeeting ? 'past-meeting' : ''}">
+        const isPast = meetingDate < currentDate;
+        const rowHTML = `
+          <tr class="${isPast ? 'past-meeting' : ''}">
             <td>${row.meetingID}</td>
             <td>${row.date}</td>
             <td>${row.time}</td>
             <td>${row.location}</td>
             <td>${row.agenda}</td>
             <td>
-              <div class="dropdown">
-                <button class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
-                  <i class="fas fa-ellipsis-v"></i>
-                </button>
-                <ul class="dropdown-menu">
-                  <li><a href="edit_meeting.php?id=${row.meetingID}"><i class="fas fa-edit"></i> Edit</a></li>
-                  <li><a href="delete_meeting.php?id=${row.meetingID}"><i class="fas fa-trash"></i> Delete</a></li>
-                </ul>
-              </div>
+              <button class="btn btn-xs btn-info" onclick="editMeeting(${row.meetingID})" title="Edit">
+                <i class="fas fa-edit"></i> Edit
+              </button>
+              <button class="btn btn-xs btn-danger" onclick="deleteMeeting(${row.meetingID})" title="Delete">
+                <i class="fas fa-trash"></i> Delete
+              </button>
             </td>
           </tr>`;
+        tbody.insertAdjacentHTML('beforeend', rowHTML);
       });
     })
     .catch(error => {
@@ -207,7 +240,65 @@
         '<tr><td colspan="6" class="text-danger text-center">Failed to load data</td></tr>';
       console.error('Error:', error);
     });
+
+  // Edit meeting
+  function editMeeting(meetingID) {
+    fetch(`get_meeting.php?id=${meetingID}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const meeting = data.meeting;
+          document.getElementById('editMeetingID').value = meeting.meetingID;
+          document.getElementById('editMeetingDate').value = meeting.date;
+          document.getElementById('editMeetingTime').value = meeting.time;
+          document.getElementById('editMeetingLocation').value = meeting.location;
+          document.getElementById('editMeetingAgenda').value = meeting.agenda;
+
+          $('#editMeetingModal').modal('show');
+        }
+      });
+  }
+
+  // Delete meeting
+  function deleteMeeting(meetingID) {
+    if (confirm('Are you sure you want to delete this meeting?')) {
+      fetch('delete_meeting.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `meetingID=${meetingID}`
+      })
+        .then(response => response.text())
+        .then(response => {
+          alert(response);
+          location.reload();
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
+  }
+
+  // Sorting function
+  function sortTable(columnIndex) {
+    const table = document.getElementById('meetingsTable');
+    const tbody = document.getElementById('meetings-table-body');
+    const rows = Array.from(tbody.rows);
+
+    const sortedRows = rows.sort((rowA, rowB) => {
+      const cellA = rowA.cells[columnIndex].textContent.trim();
+      const cellB = rowB.cells[columnIndex].textContent.trim();
+      return cellA.localeCompare(cellB);
+    });
+
+    // Clear and repopulate tbody without shrinking
+    while (tbody.firstChild) {
+      tbody.removeChild(tbody.firstChild);
+    }
+
+    sortedRows.forEach(row => tbody.appendChild(row));
+  }
 </script>
+
 
 </body>
 </html>
